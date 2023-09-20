@@ -62,38 +62,12 @@ struct ContentView: View {
                 }
                 
                 ScrollView(.vertical) {
-                    LazyVGrid(columns: [GridItem.init()]) {
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
-                        
-                        ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                                                    songTitle: "BORN TO DIE",
-                                                                    artist: "Lana Del Rey")
+                    ForEach(0..<10) { _ in 
+                        LazyVGrid(columns: [GridItem.init()]) {
+                            ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
+                                          songTitle: "BORN TO DIE",
+                                          artist: "Lana Del Rey")
+                        }
                     }
                 }
             }
