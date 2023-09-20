@@ -1,0 +1,9 @@
+# Apple Finder files
+.DS_Store
+
+# User settings
+xcuserdata/
+
+# CocoaPods
+Pods/
+*.xcworkspace
