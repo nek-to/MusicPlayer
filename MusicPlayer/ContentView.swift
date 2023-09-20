@@ -16,7 +16,6 @@ struct ContentView: View {
                             .font(Font.custom("Montserrat", size: 30)
                                 .weight(.black))
                             .foregroundColor(.white)
-//                            .padding(.all)
                     }
                     
                     Spacer()
@@ -62,14 +61,15 @@ struct ContentView: View {
                 }
                 
                 ScrollView(.vertical) {
-                    ForEach(0..<10) { _ in 
-                        LazyVGrid(columns: [GridItem.init()]) {
+                    LazyVGrid(columns: [GridItem.init()]) {
+                        ForEach(0..<15) { _ in
                             ExtractedView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
                                           songTitle: "BORN TO DIE",
                                           artist: "Lana Del Rey")
                         }
                     }
                 }
+                .scrollIndicators(.hidden)
             }
             .padding(.all)
         }
