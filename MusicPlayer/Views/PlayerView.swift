@@ -1,87 +1,178 @@
 import SwiftUI
+import ActivityKit
 
 struct PlayerView: View {
-    @State private var progress = 0.5
-
+    @ObservedObject var songsViewModel: SongViewModel
+    @StateObject private var audioPlayer = AudioPlayer()
+    @Environment(\.presentationMode) var presentationMode
+    @State var song: Song
+    @State private var final: Float = 0
+    
     var body: some View {
-            VStack {
-                HStack {
-                    Image("background")
+        VStack {
+            HStack {
+                AsyncImage(url: URL(string: songsViewModel.findPreviousSong(for: song)?.albumCoverUrl ?? "background")) { image in
+                    image
                         .resizable()
                         .frame(width: 177, height: 224)
                         .cornerRadius(20)
                         .padding(.all, 12)
-                    
-                    Image("background")
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 177, height: 224)
+                        .padding(.all, 12)
+                        .tint(.white)
+                }
+                
+                AsyncImage(url: URL(string: song.albumCoverUrl)) { image in
+                    image
                         .resizable()
                         .frame(width: 239, height: 274)
                         .cornerRadius(20)
                         .padding(.all, 12)
-                        
-                    
-                    Image("background")
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 239, height: 274)
+                        .padding(.all, 12)
+                        .tint(.white)
+                }
+                
+                
+                AsyncImage(url: URL(string: songsViewModel.findNextSong(for: song)?.albumCoverUrl ?? "background")) { image in
+                    image
                         .resizable()
                         .frame(width: 177, height: 224)
                         .cornerRadius(20)
                         .padding(.all, 12)
-                }
-                .padding(.bottom, 24)
-                
-                Text("Peaceful Piano Music")
-                  .font(
-                    Font.custom("Montserrat", size: 16)
-                      .weight(.semibold)
-                  )
-                  .multilineTextAlignment(.center)
-                  .foregroundColor(.white)
-                
-                Text("relaxing piano music")
-                  .font(
-                    Font.custom("Montserrat", size: 13)
-                      .weight(.medium)
-                  )
-                  .multilineTextAlignment(.center)
-                  .foregroundColor(.white.opacity(0.5))
-                  .padding(.bottom, 74)
-                
-                VStack {
-                    Slider(value: $progress, in: 0...1)
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 177, height: 224)
+                        .padding(.all, 12)
                         .tint(.white)
-                        .frame(width: 239)
+                }
+            }
+            .padding(.bottom, 24)
+            
+            Text(song.title)
+                .useAppStile(16)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white)
+            
+            Text(song.artist)
+                .useAppStile(13)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white.opacity(0.5))
+                .padding(.bottom, 74)
+            
+            VStack {
+                VStack {
+                    Slider(value: Binding(
+                        get: { audioPlayer.currentTime },
+                        set: { newValue in
+                            if !audioPlayer.totalTime.isNaN && newValue >= 0 && newValue <= audioPlayer.totalTime {
+                                audioPlayer.currentTime = newValue
+                            }
+                        }
+                    ), in: 0...(audioPlayer.totalTime.isNaN || audioPlayer.totalTime < 0 ? 0 : audioPlayer.totalTime))
+                }
+                .tint(.white)
+                .frame(width: 239)
+                
+                HStack {
+                    Text(audioPlayer.getCurrentTime())
+                        .useAppStile(13)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white.opacity(0.4))
                     
-                    HStack {
-                        Text("01:06")
-                            .font(
-                                Font.custom("Montserrat", size: 13)
-                                    .weight(.medium)
-                            )
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white.opacity(0.4))
-                        
-                        Spacer()
-                        
-                        Text("03:16")
-                            .font(
-                                Font.custom("Montserrat", size: 13)
-                                    .weight(.medium)
-                            )
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white.opacity(0.4))
+                    Spacer()
+                    
+                    Text(audioPlayer.getTotalTime())
+                        .useAppStile(13)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white.opacity(0.4))
+                }
+                .frame(width: 239)
+            }
+            
+            HStack {
+                Button {
+                    song = songsViewModel.findPreviousSong(for: song) ?? Song(artist: "", title: "", previewUrl: "", albumCoverUrl: "")
+                    audioPlayer.loadAudio(with: URL(string: song.previewUrl)!) { _ in
+                        audioPlayer.play()
                     }
-                    .frame(width: 239)
+                } label: {
+                    Image(systemName: "backward.end.fill")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(.white)
                 }
                 
-                PlayerButtonsView()
-            }
-            .frame(maxHeight: .infinity)
-            .edgesIgnoringSafeArea(.all)
-            .background(Image("background").resizable().ignoresSafeArea())
+                Spacer()
                 
-    }
-}
-
-struct PlayerView_Previews: PreviewProvider {
-    static var previews: some View {
-        PlayerView()
+                Button {
+                    audioPlayer.isPlaying.toggle()
+                    audioPlayer.isPlaying ? audioPlayer.play() : audioPlayer.pause()
+                } label: {
+                    if audioPlayer.isPlaying {
+                        Image(systemName: "pause.fill")
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .foregroundColor(.black)
+                    } else {
+                        Image(systemName: "play.fill")
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .foregroundColor(.black)
+                    }
+                }
+                .frame(width: 78, height: 78)
+                .background(.white)
+                .cornerRadius(38)
+                
+                Spacer()
+                
+                Button {
+                    audioPlayer.pause()
+                    song = songsViewModel.findNextSong(for: song) ?? Song(artist: "", title: "", previewUrl: "", albumCoverUrl: "")
+                    audioPlayer.loadAudio(with: URL(string: song.previewUrl)!) { _ in
+                        audioPlayer.play()
+                    }
+                } label: {
+                    Image(systemName: "forward.end.fill")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(.white)
+                }
+            }
+            .frame(width: 239)
+            .onAppear {
+                if let url = URL(string: song.previewUrl) {
+                    audioPlayer.loadAudio(with: url) { result in
+                        switch result {
+                        case .success:
+                            audioPlayer.play()
+                        case .failure(let error):
+                            print("Ошибка загрузки музыки: \(error)")
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.all)
+        .background(Image("background").resizable().ignoresSafeArea())
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: Button(action: {
+            self.presentationMode.wrappedValue.dismiss()
+        }, label: {
+            VStack(alignment: .leading) {
+                Image(systemName: "chevron.backward")
+                    .frame(width: 24, height: 24)
+                    .tint(.white)
+            }
+            .frame(width: 40, height: 40)
+            .background(Color.white.opacity(0.2))
+            .cornerRadius(20)
+        }))
     }
 }

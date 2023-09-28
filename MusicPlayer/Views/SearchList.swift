@@ -1,21 +1,19 @@
 import SwiftUI
+import ActivityKit
 
 struct SearchList: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @ObservedObject var songsViewModel = SongViewModel()
     @State var show = false
     @State var search = ""
     
     var body: some View {
-        ZStack(alignment: .top) {
-            Image("background")
-                .resizable()
-                .ignoresSafeArea()
-            
+        NavigationView {
             VStack {
                 HStack {
                     if !show {
                         Text("MusicPlayer")
-                            .font(Font.custom("Montserrat", size: 30)
-                                .weight(.black))
+                            .useAppStile(30)
                             .foregroundColor(.white)
                     }
                     
@@ -23,10 +21,14 @@ struct SearchList: View {
                     
                     HStack {
                         if show {
-                            Image(systemName: "magnifyingglass")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.white)
+                            Button {
+                                songsViewModel.fetchSongListWith(track: search.replacingOccurrences(of: " ", with: ""))
+                            } label: {
+                                Image(systemName: "magnifyingglass")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundColor(.white)
+                            }
                             
                             TextField("Search music", text: $search)
                                 .foregroundColor(.white)
@@ -60,19 +62,40 @@ struct SearchList: View {
                     .background(.white.opacity(0.2))
                     .cornerRadius(20)
                 }
+                .padding(.horizontal)
                 
+                if songsViewModel.songsList.results.isEmpty {
+                    VStack {
+                        Spacer()
+                        
+                        Text("There is no result for your request, please try again")
+                            .font(Font.custom("Montserrat", size: 20)
+                                .weight(.black))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                } else {
                 ScrollView(.vertical) {
-                    LazyVGrid(columns: [GridItem.init()]) {
-                        ForEach(0..<15) { _ in
-                            SongCardView(imageUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/y2005/m03/d30/h08/s05.atlqsocy.jpg/100x100bb.jpg",
-                                          songTitle: "BORN TO DIE",
-                                          artist: "Lana Del Rey")
+                        LazyVGrid(columns: [GridItem.init()]) {
+                            ForEach(songsViewModel.songsList.results, id: \.id) { song in
+                                NavigationLink(destination: PlayerView(songsViewModel: songsViewModel, song: song)) {
+                                    SongCardView(imageUrl: song.albumCoverUrl,
+                                                 songTitle: song.title,
+                                                 artist: song.artist)
+                                }
+                            }
                         }
                     }
-                }
                 .scrollIndicators(.hidden)
+                .padding(.horizontal)
+                }
+                
             }
             .padding(.all)
+            .background(Image("background").resizable().ignoresSafeArea())
         }
     }
 }
